@@ -1,20 +1,24 @@
 package probe.submersible.demo.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import probe.submersible.demo.model.BaseResponse;
 import probe.submersible.demo.model.SubmersibleInfo;
+import probe.submersible.demo.service.SubmersibleService;
 
 @RestController
 @RequestMapping("/submersible")
 public class SubmersibleController {
 
+    @Autowired
+    private SubmersibleService submersibleService;
+
     @PostMapping
     public ResponseEntity<BaseResponse<Void>> initialSetup(@RequestBody SubmersibleInfo request) {
 
-        return ResponseEntity
-                .ok()
-                .body(new BaseResponse<>("SUCCESS", "200", null));
+        return ResponseEntity.ok()
+                .body(submersibleService.initialSetup(request));
     }
 
     @PutMapping()
@@ -22,7 +26,7 @@ public class SubmersibleController {
 
         return ResponseEntity
                 .ok()
-                .body(new BaseResponse<>("SUCCESS", "200", null));
+                .body(submersibleService.move(dir));
     }
 
     @PatchMapping()
@@ -30,15 +34,15 @@ public class SubmersibleController {
 
         return ResponseEntity
                 .ok()
-                .body(new BaseResponse<>("SUCCESS", "200", null));
+                .body(submersibleService.changeDir(facing));
     }
 
     @GetMapping()
-    public ResponseEntity<BaseResponse<Void>> getSummary() {
+    public ResponseEntity<BaseResponse<String>> getSummary() {
 
         return ResponseEntity
                 .ok()
-                .body(new BaseResponse<>("SUCCESS", "200", null));
+                .body(submersibleService.getSummary());
     }
 
     @DeleteMapping()
@@ -46,7 +50,7 @@ public class SubmersibleController {
 
         return ResponseEntity
                 .ok()
-                .body(new BaseResponse<>("SUCCESS", "200", null));
+                .body(submersibleService.reset());
     }
 
 

@@ -41,7 +41,7 @@ class IntegrationTests {
 								"startX" : 30,
 								"startY" : 40,
 								"facing" : "E",
-								"obstacles" : [ {"x":20, "Y":25}, {"x":35, "Y":40} ]
+								"obstacles" : [ {"x":20, "y":25}, {"x":35, "y":40} ]
 								}""")
 		).andExpect(status().isOk());
 		assertEquals(100, service.getInfo().getGridLength());
@@ -59,6 +59,65 @@ class IntegrationTests {
 	}
 
 	@Test
+	void move2() throws Exception {
+		mockMvc.perform(
+				put("/submersible")
+						.param("dir", "B")
+		).andExpect(status().isOk());
+		assertEquals(30, service.getInfo().getStartX());
+		assertEquals(40, service.getInfo().getStartY());
+	}
+
+	@Test
+	void move3() throws Exception {
+		mockMvc.perform(
+				patch("/submersible")
+						.param("facing", "N")
+		).andExpect(status().isOk());
+
+		mockMvc.perform(
+				put("/submersible")
+						.param("dir", "B")
+		).andExpect(status().isOk());
+		assertEquals(30, service.getInfo().getStartX());
+		assertEquals(39, service.getInfo().getStartY());
+	}
+
+	@Test
+	void move4() throws Exception {
+		mockMvc.perform(
+				patch("/submersible")
+						.param("facing", "N")
+		).andExpect(status().isOk());
+
+		mockMvc.perform(
+				put("/submersible")
+						.param("dir", "F")
+		).andExpect(status().isOk());
+		assertEquals(30, service.getInfo().getStartX());
+		assertEquals(40, service.getInfo().getStartY());
+	}
+
+	@Test //Changing Direction to West
+	void move5() throws Exception {
+		mockMvc.perform(
+				patch("/submersible")
+						.param("facing", "W")
+		).andExpect(status().isOk());
+		assertEquals("W", service.getInfo().getFacing());
+	}
+
+	@Test //Changing Direction to East
+	void move6() throws Exception {
+		mockMvc.perform(
+				patch("/submersible")
+						.param("facing", "E")
+		).andExpect(status().isOk());
+		assertEquals("E", service.getInfo().getFacing());
+	}
+
+
+	@Test
 	void move_incorrectDirection() throws Exception {
 		var res = mockMvc.perform(
 				put("/submersible")
@@ -66,15 +125,6 @@ class IntegrationTests {
 		).andExpect(status().isOk());
 		var response = objectMapper.readValue(res.andReturn().getResponse().getContentAsString(), BaseResponse.class);
 		assertEquals("400", response.getStatusCode());
-	}
-
-	@Test
-	void changeDir() throws Exception {
-		mockMvc.perform(
-				patch("/submersible")
-						.param("facing", "W")
-		).andExpect(status().isOk());
-		assertEquals("W", service.getInfo().getFacing());
 	}
 
 	@Test
@@ -88,7 +138,7 @@ class IntegrationTests {
 	}
 
 	@Test
-	void getSummary() throws Exception {
+	void getSummary1() throws Exception {
 		var res = mockMvc.perform(
 				get("/submersible")
 		).andExpect(status().isOk());
@@ -117,7 +167,7 @@ class IntegrationTests {
 								"startX" : 100,
 								"startY" : 100,
 								"facing" : "N",
-								"obstacles" : [ {"x":20, "Y":25}, {"x":35, "Y":40} ]
+								"obstacles" : [ {"x":20, "y":25}, {"x":35, "y":40} ]
 								}""")
 		).andExpect(status().isOk());
 
@@ -128,7 +178,7 @@ class IntegrationTests {
 
 
 		var response = objectMapper.readValue(res.andReturn().getResponse().getContentAsString(), BaseResponse.class);
-		assertEquals("Cannot move. At edge of Y Grid", response.getMessage());
+		assertEquals("Cannot move. At edge of Y", response.getMessage());
 
 	}
 
@@ -144,7 +194,7 @@ class IntegrationTests {
 								"startX" : 3,
 								"startY" : 0,
 								"facing" : "E",
-								"obstacles" : [ {"x":3, "Y":1} ]
+								"obstacles" : [ {"x":3, "y":1} ]
 								}""")
 		).andExpect(status().isOk());
 
@@ -155,12 +205,25 @@ class IntegrationTests {
 
 
 		var response = objectMapper.readValue(res.andReturn().getResponse().getContentAsString(), BaseResponse.class);
-		assertEquals("Cannot move. At edge of X Grid", response.getMessage());
+		assertEquals("Cannot move. At edge of X", response.getMessage());
 
 	}
 
 	@Test
-	void initialSetup_encounteredObstacleX() throws Exception {
+	void encounteredObstacleX() throws Exception {
+		mockMvc.perform(
+				post("/submersible")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("""
+								{
+								"gridLength" : 3,
+								"gridHeight" : 3,
+								"startX" : 3,
+								"startY" : 0,
+								"facing" : "E",
+								"obstacles" : [ {"x":3, "y":1} ]
+								}""")
+		).andExpect(status().isOk());
 		mockMvc.perform(
 				patch("/submersible")
 						.param("facing", "N")
@@ -177,7 +240,7 @@ class IntegrationTests {
 	}
 
 	@Test
-	void initialSetup_atStartX() throws Exception {
+	void atStartEdgeX() throws Exception {
 		mockMvc.perform(
 				post("/submersible")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -188,7 +251,7 @@ class IntegrationTests {
 								"startX" : 0,
 								"startY" : 0,
 								"facing" : "W",
-								"obstacles" : [ {"x":3, "Y":1} ]
+								"obstacles" : [ {"x":3, "y":1} ]
 								}""")
 		).andExpect(status().isOk());
 
@@ -199,12 +262,12 @@ class IntegrationTests {
 
 
 		var response = objectMapper.readValue(res.andReturn().getResponse().getContentAsString(), BaseResponse.class);
-		assertEquals("Cannot move. At edge of X Grid", response.getMessage());
+		assertEquals("Cannot move. At edge of X", response.getMessage());
 
 	}
 
 	@Test
-	void initialSetup_atStartY() throws Exception {
+	void atStartEdgeY() throws Exception {
 		mockMvc.perform(
 				patch("/submersible")
 						.param("facing", "S")
@@ -216,7 +279,7 @@ class IntegrationTests {
 
 
 		var response = objectMapper.readValue(res.andReturn().getResponse().getContentAsString(), BaseResponse.class);
-		assertEquals("Cannot move. At edge of Y Grid", response.getMessage());
+		assertEquals("Cannot move. At edge of Y", response.getMessage());
 
 	}
 

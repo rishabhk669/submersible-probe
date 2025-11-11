@@ -15,4 +15,9 @@ public class BaseResponse<T> {
     private String statusCode;
     private T data;
 
+    public BaseResponse(String message) {
+        this.message = message;
+        statusCode = "200";
+    }
+
 }
